@@ -3,6 +3,15 @@
 clusters_count=3
 user_home_dir="/home/zhangcd"
 ob_bin_source_dir="/home/zhangcd/oceanbase_install"
+user_spec_port=10000
+
+function install_virtual_net
+{
+  for((i=1; i <= cluster_count; i++))
+  do
+    echo_execute "sudo ifconfig eth0:$i 192.168.1.$i"
+  done
+}
 
 #解析命令行参数
 while getopts "c:u:b:h" name
@@ -17,8 +26,15 @@ do
   "b")
     ob_bin_source_dir=${OPTARG}
     ;;
+  "p")
+    user_spec_port=${OPTARG}
+    ;;
+  "v")
+    echo_execute "install_virtual_net"
+    exit 0
+    ;;
   "h")
-    echo "Usage: sh $1 [-c cluster_count] [-u user_home_dir] [-b ob_bin_source_dir]"
+    echo "Usage: sh $1 [-c cluster_count] [-u user_home_dir] [-b ob_bin_source_dir] [-v]"
     exit 0;
     ;;
   *)
@@ -135,7 +151,7 @@ for((i=1; i<=clusters_count; i++))
 do
   ip[$i]="192.168.1.$i"
   eth[$i]="eth0:$i"
-  start_port[$i]=$((i*6+10000))
+  start_port[$i]=$((i*6 + user_spec_port))
 done
 
 #初始化主集群的ip, 端口信息
